@@ -36,7 +36,12 @@ int main(void) {
         while (value < 16) {
             /* Toggle led at PORTB5 */
             PORTB ^= _BV(PORTB5);
-
+            
+            /* Short way would be to directly write the value to PORTD. */
+            /* Shift by 2 because first TIL311 port is PORTD2. However  */
+            /* This would zero PORTD0, PORTD1, PORTD6 and PORTD7.       */
+            /* PORTD = value << 2; */
+            
             /* TIL311 pin 3, latch data input A (1). */
             if (0 == BIT_AT(value, 0)) {
                 PORTD &= ~(_BV(PORTD2)); 
@@ -64,6 +69,7 @@ int main(void) {
             } else {
                 PORTD |= _BV(PORTD5);
             }
+
             value++;
             _delay_ms(500);    
         }
