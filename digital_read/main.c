@@ -55,18 +55,18 @@ static int uart_getchar(FILE *stream) {
 void init(void) {
     
     /* Make PORTD3..7 PORTD0..1 (Arduino digital 3..9) input by clearing bits in DDR */
-	DDRD &= ~(_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
-	DDRB &= ~(_BV(PORTB0) | _BV(PORTB1));
+    DDRD &= ~(_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
+    DDRB &= ~(_BV(PORTB0) | _BV(PORTB1));
 
-	/* Disable pullups by clearing bits in PORT. Default state is now low. */
-	/*
-	PORTD &= ~(_BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
-	PORTB &= ~(_BV(PORTB0) | _BV(PORTB1));
-	*/
+    /* Disable pullups by clearing bits in PORT. Default state is now low. */
+    /*
+    PORTD &= ~(_BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
+    PORTB &= ~(_BV(PORTB0) | _BV(PORTB1));
+    */
 	
-	/* Enable pullups by setting bits in PORT. Default state is now high. */
-	PORTD |= (_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
-	PORTB |= (_BV(PORTB0) | _BV(PORTB1));    
+    /* Enable pullups by setting bits in PORT. Default state is now high. */
+    PORTD |= (_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
+    PORTB |= (_BV(PORTB0) | _BV(PORTB1));    
     
     /* Make PORTB5 (Arduino digital 13) an output by setting bit in DDR. */
     DDRB |= _BV(PORTB5);
