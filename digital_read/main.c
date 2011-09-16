@@ -34,22 +34,26 @@ volatile uint8_t interrupts;
 char buffer[1];
 
 static void uart_init(void) {
-	UBRR0H = UBRRH_VALUE;
-	UBRR0L = UBRRL_VALUE;
+    UBRR0H = UBRRH_VALUE;
+    UBRR0L = UBRRL_VALUE;
 
-	UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
-	UCSR0B = _BV(RXEN0) | _BV(TXEN0);
+    UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
+    UCSR0B = _BV(RXEN0) | _BV(TXEN0);
 }
 
 static int uart_putchar(char c, FILE *stream) {
-	loop_until_bit_is_set(UCSR0A, UDRE0);
-	UDR0 = c;
-	return 0;
+    loop_until_bit_is_set(UCSR0A, UDRE0);
+    UDR0 = c;
+    return 0;
 }
 
 static int uart_getchar(FILE *stream) {
-	loop_until_bit_is_set(UCSR0A, RXC0);
-	return UDR0;
+    loop_until_bit_is_set(UCSR0A, RXC0);
+    return UDR0;
+}
+
+static int digital_read(sfr, bit) {
+    return bit_is_set(sft, bit) && 1;
 }
 
 void init(void) {
@@ -63,7 +67,7 @@ void init(void) {
     PORTD &= ~(_BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
     PORTB &= ~(_BV(PORTB0) | _BV(PORTB1));
     */
-	
+    
     /* Enable pullups by setting bits in PORT. Default state is now high. */
     PORTD |= (_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
     PORTB |= (_BV(PORTB0) | _BV(PORTB1));    
@@ -73,17 +77,17 @@ void init(void) {
     
 }
 
-int main(void) {	
-	
+int main(void) {    
+    
     init();
-	uart_init();
+    uart_init();
     stdout = &output;
-	stdin  = &input;
-	    
+    stdin  = &input;
+        
     uint8_t value;
     char buffer[9];  
-	    
-	while (1) {
+        
+    while (1) {
         /* Blink led by toggling state of PORTB5 (Arduino digital 13). */
         PORTB ^= _BV(PORTB5);
         
