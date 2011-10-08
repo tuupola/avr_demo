@@ -1,3 +1,5 @@
+/* Based on Atmel Application Note AVR 306 */
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
@@ -33,6 +35,13 @@ static struct rx_ring rx_buffer;
 /* http://www.cs.mun.ca/~rod/Winter2007/4723/notes/serial/serial.html */
 
 void uart_init(void) {
+    
+    tx_buffer.start = 0;
+    tx_buffer.end   = 0;
+
+    rx_buffer.start = 0;
+    rx_buffer.end   = 0;
+    
     UBRR0H = UBRRH_VALUE;
     UBRR0L = UBRRL_VALUE;
 
@@ -80,7 +89,7 @@ ISR(USART_RX_vect) {
 ISR(USART_UDRE_vect){
     int read_pointer = (tx_buffer.start + 1) % UART_TX_BUFFER_SIZE;
     
-    /* Transit next byte if data available in ringbuffer. */
+    /* Transmit next byte if data available in ringbuffer. */
     if (read_pointer != tx_buffer.end) {
         UDR0 = tx_buffer.buffer[read_pointer];
         tx_buffer.start = read_pointer;
