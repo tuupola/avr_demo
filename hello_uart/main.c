@@ -5,6 +5,7 @@
  * Led at Arduino digital 13 (PORTB5). Cause we all love blinken leds!
  *
  * To compile and upload run: make clean; make; make program;
+ * Connect to serial with: screen /dev/tty.usbserial-* 9600
  *
  * Copyright 2011 Mika Tuupola
  *
