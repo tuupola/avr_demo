@@ -14,6 +14,11 @@
  *
  */
 
+
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
 #include <stdlib.h>
 #include <avr/io.h>
 #include <stdio.h>
@@ -22,80 +27,88 @@
 #include <avr/sfr_defs.h>
 
 #include "main.h"
-
-#ifndef F_CPU
-#define F_CPU 16000000UL
-#endif
-
-#define BAUD 9600
-#include <util/setbaud.h>
-
-volatile uint8_t interrupts;
-char buffer[1];
-
-static void uart_init(void) {
-    UBRR0H = UBRRH_VALUE;
-    UBRR0L = UBRRL_VALUE;
-
-    UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
-    UCSR0B = _BV(RXEN0) | _BV(TXEN0);
-}
-
-static int uart_putchar(char c, FILE *stream) {
-    loop_until_bit_is_set(UCSR0A, UDRE0);
-    UDR0 = c;
-    return 0;
-}
-
-static int uart_getchar(FILE *stream) {
-    loop_until_bit_is_set(UCSR0A, RXC0);
-    return UDR0;
-}
-
-static int digital_read(sfr, bit) {
-    return bit_is_set(sft, bit) && 1;
-}
+#include "uart.h"
 
 void init(void) {
     
-    /* Make PORTD3..7 PORTD0..1 (Arduino digital 3..9) input by clearing bits in DDR */
+    /* Make PORTD2..7 PORTD0..1 (Arduino digital 3..11) input by clearing bits in DDR */
     DDRD &= ~(_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
     DDRB &= ~(_BV(PORTB0) | _BV(PORTB1));
 
-    /* Disable pullups by clearing bits in PORT. Default state is now low. */
-    /*
-    PORTD &= ~(_BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
-    PORTB &= ~(_BV(PORTB0) | _BV(PORTB1));
-    */
-    
+    /* In input mode, when pull-up is enabled, default state of pin becomes ’1′. So even if */
+    /* you don’t connect anything to pin and if you try to read it, it will read as 1. Now, */
+    /* when you externally drive that pin to zero(i.e. connect to ground / or pull-down),   */
+    /* only then it will be read as 0. */
+
     /* Enable pullups by setting bits in PORT. Default state is now high. */
     PORTD |= (_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
-    PORTB |= (_BV(PORTB0) | _BV(PORTB1));    
+    PORTB |= (_BV(PORTB0) | _BV(PORTB1));
+    
+    /* Disable pullups by clearing bits in PORT. Default state is now low. */
+    /*
+    PORTD &= ~(_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
+    PORTB &= ~(_BV(PORTB0) | _BV(PORTB1));
+    */
     
     /* Make PORTB5 (Arduino digital 13) an output by setting bit in DDR. */
     DDRB |= _BV(PORTB5);
     
 }
 
+int digital_read(int input_register, int pin) {
+    return bit_is_set(input_register, pin) != 0 ? 1 : 0;
+}
+
+/*
+void digital_write(int input_register, int pin) {
+    input_register |= _BV(pin);
+}
+*/
+
 int main(void) {    
     
     init();
     uart_init();
-    stdout = &output;
-    stdin  = &input;
-        
-    uint8_t value;
-    char buffer[9];  
+    stdout = &uart_output;
+    stdin  = &uart_input;
+    
+    int  value;
+    //char buffer[9];  
         
     while (1) {
         /* Blink led by toggling state of PORTB5 (Arduino digital 13). */
         PORTB ^= _BV(PORTB5);
-        
-        /* Take 8bit value from PORTD3..7 PORTD0..1 */      
-        value = (PIND >> 2) + (PINB << 6);
 
+        /*
+        puts("PINB");
+        value = PINB;
         itoa(value, buffer, 2);
         puts(buffer);
+        */
+        
+        value = digital_read(PIND, PIND2);
+        printf("%d", value);
+
+        value = digital_read(PIND, PIND3);
+        printf("%d", value);
+
+        value = digital_read(PIND, PIND4);
+        printf("%d", value);
+
+        value = digital_read(PIND, PIND5);
+        printf("%d", value);
+
+        value = digital_read(PIND, PIND6);
+        printf("%d", value);
+
+        value = digital_read(PIND, PIND7);
+        printf("%d", value);
+        
+        value = digital_read(PINB, PINB0);
+        printf("%d", value);
+
+        value = digital_read(PINB, PINB1);
+        printf("%d\n", value);
         
         _delay_ms(500);    
     }
