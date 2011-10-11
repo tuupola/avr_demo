@@ -1,7 +1,7 @@
 /*
- * Button with debouncing. Based on the Arduino example but without
- * Arduino libraries.
+ * Button with debouncing. Based on Lab Book Pages pseudocode.
  * 
+ * http://www.labbookpages.co.uk/electronics/debounce.html
  * http://www.arduino.cc/en/Tutorial/Debounce
  * 
  * To compile and upload run: make clean; make; make program;
