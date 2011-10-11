@@ -1,0 +1,552 @@
+   1               		.file	"main.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.global __do_copy_data
+   8               		.global __do_clear_bss
+   9               		.text
+  10               	.Ltext0:
+  11               	.global	digital_read
+  13               	digital_read:
+  14               	.LFB6:
+  15               		.file 1 "main.c"
+   1:main.c        **** /*
+   2:main.c        ****  * Button with debouncing. Based on the Arduino example but without
+   3:main.c        ****  * Arduino libraries.
+   4:main.c        ****  * 
+   5:main.c        ****  * http://www.arduino.cc/en/Tutorial/Debounce
+   6:main.c        ****  * 
+   7:main.c        ****  * To compile and upload run: make clean; make; make program;
+   8:main.c        ****  * 
+   9:main.c        ****  * Copyright 2011 Mika Tuupola
+  10:main.c        ****  *
+  11:main.c        ****  * Licensed under the MIT license:
+  12:main.c        ****  *   http://www.opensource.org/licenses/mit-license.php
+  13:main.c        ****  *
+  14:main.c        ****  */
+  15:main.c        **** 
+  16:main.c        **** 
+  17:main.c        **** #ifndef F_CPU
+  18:main.c        **** #define F_CPU 16000000UL
+  19:main.c        **** #endif
+  20:main.c        **** 
+  21:main.c        **** #include <stdlib.h>
+  22:main.c        **** #include <avr/io.h>
+  23:main.c        **** #include <stdio.h>
+  24:main.c        **** #include <util/delay.h>
+  25:main.c        **** #include <stdint.h>
+  26:main.c        **** #include <avr/sfr_defs.h>
+  27:main.c        **** 
+  28:main.c        **** #include "main.h"
+  29:main.c        **** #include "uart.h"
+  30:main.c        **** #include "timer.h"
+  31:main.c        **** 
+  32:main.c        **** void init(void) {
+  33:main.c        ****     
+  34:main.c        ****     /* Make PORTD2 (Arduino digital 2) input by clearing bit in DDR */
+  35:main.c        ****     DDRD &= ~(_BV(PORTD2));
+  36:main.c        **** 
+  37:main.c        ****     /* In input mode, when pull-up is enabled, default state of pin becomes ’1′. So even if */
+  38:main.c        ****     /* you don’t connect anything to pin and if you try to read it, it will read as 1. Now, */
+  39:main.c        ****     /* when you externally drive that pin to zero(i.e. connect to ground / or pull-down),   */
+  40:main.c        ****     /* only then it will be read as 0. */
+  41:main.c        **** 
+  42:main.c        ****     /* Enable pullups by setting bits in PORT. Default state is now high. */
+  43:main.c        ****     PORTD |= (_BV(PORTD2));
+  44:main.c        ****     
+  45:main.c        ****     /* Make PORTB5 (Arduino digital 13) an output by setting bit in DDR. */
+  46:main.c        ****     DDRB |= _BV(PORTB5);
+  47:main.c        ****     
+  48:main.c        **** }
+  49:main.c        **** 
+  50:main.c        **** uint8_t digital_read(int input_register, int pin) {
+  16               		.loc 1 50 0
+  17               	.LVL0:
+  18 0000 CF93      		push r28
+  19               	.LCFI0:
+  20 0002 DF93      		push r29
+  21               	.LCFI1:
+  22 0004 00D0      		rcall .
+  23               	.LCFI2:
+  24 0006 CDB7      		in r28,__SP_L__
+  25 0008 DEB7      		in r29,__SP_H__
+  26               	.LCFI3:
+  27               	/* prologue: function */
+  28               	/* frame size = 2 */
+  29               	/* stack size = 4 */
+  30               	.L__stack_usage = 4
+  31 000a 9A83      		std Y+2,r25
+  32 000c 8983      		std Y+1,r24
+  51:main.c        ****     return bit_is_set(input_register, pin) != 0 ? 1 : 0;
+  33               		.loc 1 51 0
+  34 000e 8981      		ldd r24,Y+1
+  35               	.LVL1:
+  36 0010 90E0      		ldi r25,lo8(0)
+  37 0012 00C0      		rjmp 2f
+  38 0014 9595      	1:	asr r25
+  39 0016 8795      		ror r24
+  40 0018 6A95      	2:	dec r22
+  41 001a 02F4      		brpl 1b
+  52:main.c        **** }
+  42               		.loc 1 52 0
+  43 001c 8170      		andi r24,lo8(1)
+  44               	/* epilogue start */
+  45 001e 0F90      		pop __tmp_reg__
+  46 0020 0F90      		pop __tmp_reg__
+  47 0022 DF91      		pop r29
+  48 0024 CF91      		pop r28
+  49 0026 0895      		ret
+  50               	.LFE6:
+  52               	.global	digital_write
+  54               	digital_write:
+  55               	.LFB7:
+  53:main.c        **** 
+  54:main.c        **** /* You could use cbi ie &= ~ or sbi ie |= but this makes code more readable. */
+  55:main.c        **** void digital_write(volatile uint8_t *data_port, uint8_t pin, uint8_t value) {
+  56               		.loc 1 55 0
+  57               	.LVL2:
+  58               	/* prologue: function */
+  59               	/* frame size = 0 */
+  60               	/* stack size = 0 */
+  61               	.L__stack_usage = 0
+  62 0028 FC01      		movw r30,r24
+  56:main.c        ****     if (0 == value) {
+  57:main.c        ****         *data_port &= ~(_BV(pin));
+  63               		.loc 1 57 0
+  64 002a 2081      		ld r18,Z
+  65 002c 81E0      		ldi r24,lo8(1)
+  66 002e 90E0      		ldi r25,hi8(1)
+  67               	.LVL3:
+  68 0030 00C0      		rjmp 2f
+  69 0032 880F      	1:	lsl r24
+  70 0034 991F      		rol r25
+  71 0036 6A95      	2:	dec r22
+  72 0038 02F4      		brpl 1b
+  56:main.c        ****     if (0 == value) {
+  73               		.loc 1 56 0
+  74 003a 4423      		tst r20
+  75 003c 01F4      		brne .L3
+  76               		.loc 1 57 0
+  77 003e 8095      		com r24
+  78 0040 8223      		and r24,r18
+  79 0042 8083      		st Z,r24
+  80 0044 0895      		ret
+  81               	.L3:
+  58:main.c        ****     } else {
+  59:main.c        ****         *data_port |= _BV(pin);
+  82               		.loc 1 59 0
+  83 0046 282B      		or r18,r24
+  84 0048 2083      		st Z,r18
+  85 004a 0895      		ret
+  86               	.LFE7:
+  88               		.data
+  89               	.LC0:
+  90 0000 2D20 5265 		.string	"- Reading toggled %d (%d)\n"
+  90      6164 696E 
+  90      6720 746F 
+  90      6767 6C65 
+  90      6420 2564 
+  91               	.LC1:
+  92 001b 2B20 5374 		.string	"+ State toggled %d (%d)\n"
+  92      6174 6520 
+  92      746F 6767 
+  92      6C65 6420 
+  92      2564 2028 
+  93               		.section	.text.startup,"ax",@progbits
+  94               	.global	main
+  96               	main:
+  97               	.LFB8:
+  60:main.c        ****     }
+  61:main.c        **** }
+  62:main.c        **** 
+  63:main.c        **** int main(void) {    
+  98               		.loc 1 63 0
+  99 0000 CF93      		push r28
+ 100               	.LCFI4:
+ 101 0002 DF93      		push r29
+ 102               	.LCFI5:
+ 103 0004 00D0      		rcall .
+ 104               	.LCFI6:
+ 105 0006 CDB7      		in r28,__SP_L__
+ 106 0008 DEB7      		in r29,__SP_H__
+ 107               	.LCFI7:
+ 108               	/* prologue: function */
+ 109               	/* frame size = 2 */
+ 110               	/* stack size = 4 */
+ 111               	.L__stack_usage = 4
+ 112               	.LBB6:
+ 113               	.LBB7:
+  35:main.c        ****     DDRD &= ~(_BV(PORTD2));
+ 114               		.loc 1 35 0
+ 115 000a 5298      		cbi 42-0x20,2
+  43:main.c        ****     PORTD |= (_BV(PORTD2));
+ 116               		.loc 1 43 0
+ 117 000c 5A9A      		sbi 43-0x20,2
+  46:main.c        ****     DDRB |= _BV(PORTB5);
+ 118               		.loc 1 46 0
+ 119 000e 259A      		sbi 36-0x20,5
+ 120               	.LBE7:
+ 121               	.LBE6:
+  64:main.c        ****     
+  65:main.c        ****     init();
+  66:main.c        ****     timer_init();
+ 122               		.loc 1 66 0
+ 123 0010 0E94 0000 		call timer_init
+  67:main.c        ****     uart_init();
+ 124               		.loc 1 67 0
+ 125 0014 0E94 0000 		call uart_init
+  68:main.c        ****     stdout = &uart_output;
+ 126               		.loc 1 68 0
+ 127 0018 80E0      		ldi r24,lo8(uart_output)
+ 128 001a 90E0      		ldi r25,hi8(uart_output)
+ 129 001c 9093 0000 		sts __iob+2+1,r25
+ 130 0020 8093 0000 		sts __iob+2,r24
+  69:main.c        ****     stdin  = &uart_input;
+ 131               		.loc 1 69 0
+ 132 0024 80E0      		ldi r24,lo8(uart_input)
+ 133 0026 90E0      		ldi r25,hi8(uart_input)
+ 134 0028 9093 0000 		sts __iob+1,r25
+ 135 002c 8093 0000 		sts __iob,r24
+ 136               	.LVL4:
+  70:main.c        ****     
+  71:main.c        ****     uint8_t current_reading;
+  72:main.c        ****     uint8_t previous_reading = 0;
+  73:main.c        ****     uint8_t current_state    = 0;
+  74:main.c        ****     uint8_t previous_state   = 0;
+ 137               		.loc 1 74 0
+ 138 0030 7724      		clr r7
+  73:main.c        ****     uint8_t current_state    = 0;
+ 139               		.loc 1 73 0
+ 140 0032 00E0      		ldi r16,lo8(0)
+  72:main.c        ****     uint8_t previous_reading = 0;
+ 141               		.loc 1 72 0
+ 142 0034 20E0      		ldi r18,lo8(0)
+  75:main.c        ****     
+  76:main.c        ****     uint64_t last_toggle_time;
+  77:main.c        **** 
+  78:main.c        ****     while (1) {
+  79:main.c        ****         
+  80:main.c        ****         current_reading = digital_read(PIND, PIND2);
+  81:main.c        ****         if (current_reading != previous_reading) {
+  82:main.c        ****             /* Note the time in millis of last change of button state. */
+  83:main.c        ****             last_toggle_time = timer_millis();
+  84:main.c        ****             printf("- Reading toggled %d (%d)\n", current_reading, last_toggle_time);
+ 143               		.loc 1 84 0
+ 144 0036 40E0      		ldi r20,lo8(.LC0)
+ 145 0038 442E      		mov r4,r20
+ 146 003a 40E0      		ldi r20,hi8(.LC0)
+ 147 003c 542E      		mov r5,r20
+  85:main.c        ****         }
+  86:main.c        **** 
+  87:main.c        ****         /* If there has been more than 10 millis since last toggling  */
+  88:main.c        ****         /* of button state, assume it is real and not bouncing noise. */
+  89:main.c        ****         if ((timer_millis() - last_toggle_time) > 10) {
+  90:main.c        ****             current_state = current_reading;
+  91:main.c        ****         }
+  92:main.c        ****         
+  93:main.c        ****         /* Just for debugging purposes. */
+  94:main.c        ****         if (current_state != previous_state) {
+  95:main.c        ****             printf("+ State toggled %d (%d)\n", current_state, last_toggle_time);
+ 148               		.loc 1 95 0
+ 149 003e 50E0      		ldi r21,lo8(.LC1)
+ 150 0040 252E      		mov r2,r21
+ 151 0042 50E0      		ldi r21,hi8(.LC1)
+ 152 0044 352E      		mov r3,r21
+ 153 0046 00C0      		rjmp .L6
+ 154               	.LVL5:
+ 155               	.L23:
+  51:main.c        ****     return bit_is_set(input_register, pin) != 0 ? 1 : 0;
+ 156               		.loc 1 51 0
+ 157 0048 212F      		mov r18,r17
+ 158               	.LVL6:
+ 159               	.L6:
+  80:main.c        ****         current_reading = digital_read(PIND, PIND2);
+ 160               		.loc 1 80 0
+ 161 004a 89B1      		in r24,41-0x20
+ 162 004c 8983      		std Y+1,r24
+ 163 004e 1A82      		std Y+2,__zero_reg__
+ 164               	.LVL7:
+ 165               	.LBB8:
+ 166               	.LBB9:
+  51:main.c        ****     return bit_is_set(input_register, pin) != 0 ? 1 : 0;
+ 167               		.loc 1 51 0
+ 168 0050 8981      		ldd r24,Y+1
+ 169 0052 90E0      		ldi r25,lo8(0)
+ 170 0054 9595      		asr r25
+ 171 0056 8795      		ror r24
+ 172 0058 9595      		asr r25
+ 173 005a 8795      		ror r24
+ 174 005c 182F      		mov r17,r24
+ 175 005e 1170      		andi r17,lo8(1)
+ 176               	.LBE9:
+ 177               	.LBE8:
+  81:main.c        ****         if (current_reading != previous_reading) {
+ 178               		.loc 1 81 0
+ 179 0060 1217      		cp r17,r18
+ 180 0062 01F0      		breq .L7
+  83:main.c        ****             last_toggle_time = timer_millis();
+ 181               		.loc 1 83 0
+ 182 0064 0E94 0000 		call timer_millis
+ 183               	.LVL8:
+ 184 0068 4901      		movw r8,r18
+ 185               	.LVL9:
+ 186 006a 5A01      		movw r10,r20
+ 187 006c 6B01      		movw r12,r22
+ 188 006e 7C01      		movw r14,r24
+ 189               	.LVL10:
+  84:main.c        ****             printf("- Reading toggled %d (%d)\n", current_reading, last_toggle_time);
+ 190               		.loc 1 84 0
+ 191 0070 8DB7      		in r24,__SP_L__
+ 192 0072 9EB7      		in r25,__SP_H__
+ 193 0074 0C97      		sbiw r24,12
+ 194 0076 0FB6      		in __tmp_reg__,__SREG__
+ 195 0078 F894      		cli
+ 196 007a 9EBF      		out __SP_H__,r25
+ 197 007c 0FBE      		out __SREG__,__tmp_reg__
+ 198 007e 8DBF      		out __SP_L__,r24
+ 199 0080 EDB7      		in r30,__SP_L__
+ 200 0082 FEB7      		in r31,__SP_H__
+ 201 0084 3196      		adiw r30,1
+ 202 0086 ADB7      		in r26,__SP_L__
+ 203 0088 BEB7      		in r27,__SP_H__
+ 204 008a 1296      		adiw r26,1+1
+ 205 008c 5C92      		st X,r5
+ 206 008e 4E92      		st -X,r4
+ 207 0090 1197      		sbiw r26,1
+ 208 0092 1283      		std Z+2,r17
+ 209 0094 1382      		std Z+3,__zero_reg__
+ 210 0096 8482      		std Z+4,r8
+ 211 0098 9582      		std Z+5,r9
+ 212 009a A682      		std Z+6,r10
+ 213 009c B782      		std Z+7,r11
+ 214 009e C086      		std Z+8,r12
+ 215 00a0 D186      		std Z+9,r13
+ 216 00a2 E286      		std Z+10,r14
+ 217 00a4 F386      		std Z+11,r15
+ 218               	.LCFI8:
+ 219 00a6 0E94 0000 		call printf
+ 220 00aa 8DB7      		in r24,__SP_L__
+ 221 00ac 9EB7      		in r25,__SP_H__
+ 222 00ae 0C96      		adiw r24,12
+ 223 00b0 0FB6      		in __tmp_reg__,__SREG__
+ 224 00b2 F894      		cli
+ 225 00b4 9EBF      		out __SP_H__,r25
+ 226 00b6 0FBE      		out __SREG__,__tmp_reg__
+ 227 00b8 8DBF      		out __SP_L__,r24
+ 228               	.LVL11:
+ 229               	.L7:
+  89:main.c        ****         if ((timer_millis() - last_toggle_time) > 10) {
+ 230               		.loc 1 89 0
+ 231               	.LCFI9:
+ 232 00ba 0E94 0000 		call timer_millis
+ 233 00be E22F      		mov r30,r18
+ 234 00c0 E819      		sub r30,r8
+ 235 00c2 F1E0      		ldi r31,lo8(1)
+ 236 00c4 2E17      		cp r18,r30
+ 237 00c6 00F0      		brlo .L9
+ 238 00c8 F0E0      		ldi r31,lo8(0)
+ 239               	.L9:
+ 240 00ca A32F      		mov r26,r19
+ 241 00cc A919      		sub r26,r9
+ 242 00ce 21E0      		ldi r18,lo8(1)
+ 243 00d0 3A17      		cp r19,r26
+ 244 00d2 00F0      		brlo .L10
+ 245 00d4 20E0      		ldi r18,lo8(0)
+ 246               	.L10:
+ 247 00d6 3A2F      		mov r19,r26
+ 248 00d8 3F1B      		sub r19,r31
+ 249 00da F1E0      		ldi r31,lo8(1)
+ 250 00dc A317      		cp r26,r19
+ 251 00de 00F0      		brlo .L11
+ 252 00e0 F0E0      		ldi r31,lo8(0)
+ 253               	.L11:
+ 254 00e2 2F2B      		or r18,r31
+ 255 00e4 A42F      		mov r26,r20
+ 256 00e6 AA19      		sub r26,r10
+ 257 00e8 F1E0      		ldi r31,lo8(1)
+ 258 00ea 4A17      		cp r20,r26
+ 259 00ec 00F0      		brlo .L12
+ 260 00ee F0E0      		ldi r31,lo8(0)
+ 261               	.L12:
+ 262 00f0 4A2F      		mov r20,r26
+ 263 00f2 421B      		sub r20,r18
+ 264 00f4 21E0      		ldi r18,lo8(1)
+ 265 00f6 A417      		cp r26,r20
+ 266 00f8 00F0      		brlo .L13
+ 267 00fa 20E0      		ldi r18,lo8(0)
+ 268               	.L13:
+ 269 00fc F22B      		or r31,r18
+ 270 00fe A52F      		mov r26,r21
+ 271 0100 AB19      		sub r26,r11
+ 272 0102 21E0      		ldi r18,lo8(1)
+ 273 0104 5A17      		cp r21,r26
+ 274 0106 00F0      		brlo .L14
+ 275 0108 20E0      		ldi r18,lo8(0)
+ 276               	.L14:
+ 277 010a 5A2F      		mov r21,r26
+ 278 010c 5F1B      		sub r21,r31
+ 279 010e F1E0      		ldi r31,lo8(1)
+ 280 0110 A517      		cp r26,r21
+ 281 0112 00F0      		brlo .L15
+ 282 0114 F0E0      		ldi r31,lo8(0)
+ 283               	.L15:
+ 284 0116 2F2B      		or r18,r31
+ 285 0118 A62F      		mov r26,r22
+ 286 011a AC19      		sub r26,r12
+ 287 011c F1E0      		ldi r31,lo8(1)
+ 288 011e 6A17      		cp r22,r26
+ 289 0120 00F0      		brlo .L16
+ 290 0122 F0E0      		ldi r31,lo8(0)
+ 291               	.L16:
+ 292 0124 6A2F      		mov r22,r26
+ 293 0126 621B      		sub r22,r18
+ 294 0128 21E0      		ldi r18,lo8(1)
+ 295 012a A617      		cp r26,r22
+ 296 012c 00F0      		brlo .L17
+ 297 012e 20E0      		ldi r18,lo8(0)
+ 298               	.L17:
+ 299 0130 F22B      		or r31,r18
+ 300 0132 272F      		mov r18,r23
+ 301 0134 2D19      		sub r18,r13
+ 302 0136 A1E0      		ldi r26,lo8(1)
+ 303 0138 7217      		cp r23,r18
+ 304 013a 00F0      		brlo .L18
+ 305 013c A0E0      		ldi r26,lo8(0)
+ 306               	.L18:
+ 307 013e 722F      		mov r23,r18
+ 308 0140 7F1B      		sub r23,r31
+ 309 0142 F1E0      		ldi r31,lo8(1)
+ 310 0144 2717      		cp r18,r23
+ 311 0146 00F0      		brlo .L19
+ 312 0148 F0E0      		ldi r31,lo8(0)
+ 313               	.L19:
+ 314 014a AF2B      		or r26,r31
+ 315 014c F82F      		mov r31,r24
+ 316 014e FE19      		sub r31,r14
+ 317 0150 21E0      		ldi r18,lo8(1)
+ 318 0152 8F17      		cp r24,r31
+ 319 0154 00F0      		brlo .L20
+ 320 0156 20E0      		ldi r18,lo8(0)
+ 321               	.L20:
+ 322 0158 8F2F      		mov r24,r31
+ 323 015a 8A1B      		sub r24,r26
+ 324 015c A1E0      		ldi r26,lo8(1)
+ 325 015e F817      		cp r31,r24
+ 326 0160 00F0      		brlo .L21
+ 327 0162 A0E0      		ldi r26,lo8(0)
+ 328               	.L21:
+ 329 0164 2A2B      		or r18,r26
+ 330 0166 9F19      		sub r25,r15
+ 331 0168 9217      		cp r25,r18
+ 332 016a 01F4      		brne .L24
+ 333 016c 8823      		tst r24
+ 334 016e 01F4      		brne .L24
+ 335 0170 7723      		tst r23
+ 336 0172 01F4      		brne .L24
+ 337 0174 6623      		tst r22
+ 338 0176 01F4      		brne .L24
+ 339 0178 5523      		tst r21
+ 340 017a 01F4      		brne .L24
+ 341 017c 4423      		tst r20
+ 342 017e 01F4      		brne .L24
+ 343 0180 3323      		tst r19
+ 344 0182 01F4      		brne .L24
+ 345 0184 EB30      		cpi r30,lo8(11)
+ 346 0186 00F0      		brlo .L8
+ 347               	.L24:
+  51:main.c        ****     return bit_is_set(input_register, pin) != 0 ? 1 : 0;
+ 348               		.loc 1 51 0
+ 349 0188 012F      		mov r16,r17
+ 350               	.LVL12:
+ 351               	.L8:
+  94:main.c        ****         if (current_state != previous_state) {
+ 352               		.loc 1 94 0
+ 353 018a 0715      		cp r16,r7
+ 354 018c 01F4      		brne .+2
+ 355 018e 00C0      		rjmp .L23
+ 356               		.loc 1 95 0
+ 357 0190 ADB7      		in r26,__SP_L__
+ 358 0192 BEB7      		in r27,__SP_H__
+ 359 0194 1C97      		sbiw r26,12
+ 360 0196 0FB6      		in __tmp_reg__,__SREG__
+ 361 0198 F894      		cli
+ 362 019a BEBF      		out __SP_H__,r27
+ 363 019c 0FBE      		out __SREG__,__tmp_reg__
+ 364 019e ADBF      		out __SP_L__,r26
+ 365 01a0 EDB7      		in r30,__SP_L__
+ 366 01a2 FEB7      		in r31,__SP_H__
+ 367 01a4 3196      		adiw r30,1
+ 368 01a6 1296      		adiw r26,1+1
+ 369 01a8 3C92      		st X,r3
+ 370 01aa 2E92      		st -X,r2
+ 371 01ac 1197      		sbiw r26,1
+ 372 01ae 0283      		std Z+2,r16
+ 373 01b0 1382      		std Z+3,__zero_reg__
+ 374 01b2 8482      		std Z+4,r8
+ 375 01b4 9582      		std Z+5,r9
+ 376 01b6 A682      		std Z+6,r10
+ 377 01b8 B782      		std Z+7,r11
+ 378 01ba C086      		std Z+8,r12
+ 379 01bc D186      		std Z+9,r13
+ 380 01be E286      		std Z+10,r14
+ 381 01c0 F386      		std Z+11,r15
+ 382               	.LCFI10:
+ 383 01c2 0E94 0000 		call printf
+ 384               	.LVL13:
+ 385 01c6 8DB7      		in r24,__SP_L__
+ 386 01c8 9EB7      		in r25,__SP_H__
+ 387 01ca 0C96      		adiw r24,12
+ 388 01cc 0FB6      		in __tmp_reg__,__SREG__
+ 389 01ce F894      		cli
+ 390 01d0 9EBF      		out __SP_H__,r25
+ 391 01d2 0FBE      		out __SREG__,__tmp_reg__
+ 392 01d4 8DBF      		out __SP_L__,r24
+ 393 01d6 702E      		mov r7,r16
+ 394 01d8 00C0      		rjmp .L23
+ 395               	.LFE8:
+ 397               	.global	uart_input
+ 398               		.data
+ 401               	uart_input:
+ 402 0034 0000 00   		.skip 3,0
+ 403 0037 01        		.byte	1
+ 404 0038 0000 0000 		.skip 4,0
+ 405 003c 0000      		.word	0
+ 406 003e 0000      		.word	gs(uart_getchar)
+ 407 0040 0000      		.word	0
+ 408               	.global	uart_output
+ 411               	uart_output:
+ 412 0042 0000 00   		.skip 3,0
+ 413 0045 02        		.byte	2
+ 414 0046 0000 0000 		.skip 4,0
+ 415 004a 0000      		.word	gs(uart_putchar)
+ 416 004c 0000      		.word	0
+ 417 004e 0000      		.word	0
+ 512               	.Letext0:
+ 513               		.file 2 "/usr/local/Cellar/avr-gcc/4.6.1/lib/gcc/avr/4.6.1/../../../../avr/include/stdint.h"
+ 514               		.file 3 "/usr/local/Cellar/avr-gcc/4.6.1/lib/gcc/avr/4.6.1/../../../../avr/include/stdio.h"
+ 515               		.file 4 "uart.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 main.c
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:2      *ABS*:000000000000003f __SREG__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:3      *ABS*:000000000000003e __SP_H__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:4      *ABS*:000000000000003d __SP_L__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:13     .text:0000000000000000 digital_read
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:54     .text:0000000000000028 digital_write
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:96     .text.startup:0000000000000000 main
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:411    .data:0000000000000042 uart_output
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//ccYMcvqY.s:401    .data:0000000000000034 uart_input
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss
+timer_init
+uart_init
+__iob
+timer_millis
+printf
+uart_getchar
+uart_putchar
