@@ -527,6 +527,7 @@
 //#define _D_READ(port_id, msk)       ((PORTID_TO_INPUT_REG(port_id)) & (msk))
 #define _D_READ(port_id, msk)       (((PORTID_TO_INPUT_REG(port_id)) & (msk)) != 0 ? 1 : 0)
 
+#define _D_TOGGLE(port_id, msk)   PORTID_TO_OUTPUT_REG(port_id) ^= (msk)
 /*
  *
  *  NOTICE: for pins at timer0A/0B, 
@@ -560,6 +561,7 @@
 
 #define pin_mode(pin, mode)     SET_##mode(pin)
 #define pin_pullup(pin, val)    D_WRITE_##val(pin)
+#define pin_toggle(pin)         EXPAND_WRAPPER(_D_TOGGLE, ARDUINOPIN_TO_PORTID(pin), ARDUINOPIN_TO_PORTMSK(pin) )
 
 
 #endif /* PINS_H */

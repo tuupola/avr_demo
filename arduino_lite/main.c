@@ -74,7 +74,8 @@ int main(void) {
     while (1) {
         
         /* Blink led by toggling state of PORTB5 (Arduino digital 13). */
-        PORTB ^= _BV(PORTB5);
+        //PORTB ^= _BV(PORTB5);
+        pin_toggle(13);
         
         value = digital_read(2);
         printf("%d", value);
