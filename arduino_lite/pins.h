@@ -25,7 +25,8 @@
 #define INPUT 0x0
 #define OUTPUT 0x1
 
-
+#define ENABLE 0x1
+#define DISABLE 0x0
 
 #define ARDUINOPIN_TO_TIMERID(x) TIMER_AT_PIN_##x
 #define ARDUINOPIN_TO_TCCRID(x) TCCR_AT_PIN_##x
@@ -548,9 +549,14 @@
 #define D_WRITE_0x1(pin)        D_WRITE_HIGH(pin) 
 #define D_WRITE_0x0(pin)        D_WRITE_LOW(pin)
 
+#define D_WRITE_ENABLE(pin)     D_WRITE_HIGH(pin) 
+#define D_WRITE_DISABLE(pin)    D_WRITE_LOW(pin)
+
 #define SET_OUTPUT(pin)         EXPAND_WRAPPER(_SET_OUTPUT, ARDUINOPIN_TO_PORTID(pin), ARDUINOPIN_TO_PORTMSK(pin) )
 #define SET_INPUT(pin)          EXPAND_WRAPPER(_SET_INTPUT, ARDUINOPIN_TO_PORTID(pin), ARDUINOPIN_TO_PORTMSK(pin) )
 
 #define pin_mode(pin, mode)     SET_##mode(pin)
+#define pin_pullup(pin, val)    D_WRITE_##val(pin)
+
 
 #endif /* PINS_H */

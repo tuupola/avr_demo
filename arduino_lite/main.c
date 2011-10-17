@@ -32,9 +32,7 @@
 
 void init(void) {
     
-    /* Make PORTD2..7 PORTD0..1 (Arduino digital 2..10) input by clearing bits in DDR */
-    //DDRD &= ~(_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
-    //DDRB &= ~(_BV(PORTB0) | _BV(PORTB1));
+    /* Switch inputs. */
     pin_mode(2, INPUT);
     pin_mode(3, INPUT);
     pin_mode(4, INPUT);
@@ -48,32 +46,20 @@ void init(void) {
     /* you don’t connect anything to pin and if you try to read it, it will read as 1. Now, */
     /* when you externally drive that pin to zero(i.e. connect to ground / or pull-down),   */
     /* only then it will be read as 0. */
-
-    /* Enable pullups by setting bits in PORT. Default state is now high. */
-    PORTD |= (_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
-    PORTB |= (_BV(PORTB0) | _BV(PORTB1));
     
-    /* Disable pullups by clearing bits in PORT. Default state is now low. */
-    /*
-    PORTD &= ~(_BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) | _BV(PORTD7));
-    PORTB &= ~(_BV(PORTB0) | _BV(PORTB1));
-    */
+    pin_pullup(2, DISABLE);
+    pin_pullup(3, DISABLE);
+    pin_pullup(4, DISABLE);
+    pin_pullup(5, DISABLE);
+    pin_pullup(6, DISABLE);
+    pin_pullup(7, DISABLE);
+    pin_pullup(8, DISABLE);
+    pin_pullup(9, DISABLE);
     
-    /* Make PORTB5 (Arduino digital 13) an output by setting bit in DDR. */
-    //DDRB |= _BV(PORTB5);
+    /* Blinken led. */
     pin_mode(13, OUTPUT);
     
 }
-
-/*
-int digital_read(int input_register, int pin) {
-    return bit_is_set(input_register, pin) != 0 ? 1 : 0;
-}
-
-void digital_write(int input_register, int pin) {
-    input_register |= _BV(pin);
-}
-*/
 
 int main(void) {    
     
@@ -83,18 +69,11 @@ int main(void) {
     stdin  = &uart_input;
     
     int  value;
-    //char buffer[9];  
         
     while (1) {
+        
         /* Blink led by toggling state of PORTB5 (Arduino digital 13). */
         PORTB ^= _BV(PORTB5);
-
-        /*
-        puts("PINB");
-        value = PINB;
-        itoa(value, buffer, 2);
-        puts(buffer);
-        */
         
         value = digital_read(2);
         printf("%d", value);
