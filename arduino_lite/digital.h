@@ -1,3 +1,23 @@
+/*
+ * digital.h
+ *
+ * Lightweight macro implementation of Arduino style pin numbering
+ * for AVR microprocessors. Because only thing I want to use from
+ * Arduino libraries is the pin numbering scheme.
+ * 
+ * This file taken 99% from the excellent ArduinoLite project by 
+ * Shikai Chen <csk@live.com>. Some minor changes to suite my personal 
+ * coding taste.
+ *
+ *   http://code.google.com/p/arduino-lite/
+ *   http://www.csksoft.net/
+ *
+ * Copyright (c) 2010-2011 Shikai Chen
+ *
+ * Licensed under the LGPL 2.1 license:
+ *   http://www.opensource.org/licenses/lgpl-2.1.php
+ */
+
 #ifndef DIGITAL_H
 #define DIGITAL_H
 #include "pins.h"

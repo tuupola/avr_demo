@@ -1,18 +1,21 @@
 /*
- *  ArduinoLite 
- *  A lightweight runtime system for AVR chips
- *  by Shikai Chen (csk@live.com, http://www.csksoft.net)
+ * pins.h
  *
- *  pins_arduino_lit.h - Static Arduino Pin to AVR Pin mapping table
+ * Lightweight macro implementation of Arduino style pin numbering
+ * for AVR microprocessors. Because only thing I want to use from
+ * Arduino libraries is the pin numbering scheme.
+ * 
+ * This file taken 99% from the excellent ArduinoLite project by 
+ * Shikai Chen <csk@live.com>. Some minor changes to suite my personal 
+ * coding taste.
  *
- *  ArduinoLite is based on the work of Arduino Project (arduino.cc) 
+ *   http://code.google.com/p/arduino-lite/
+ *   http://www.csksoft.net/
  *
- *  Support AVR Chips
- *  Atmega8
- *  Atmegax8 series: Atmega48 Atmega88 Atmega168 ...
- *  Attiny2313
- *  Attiny26
- *  Atmega1280 (not vaildated yet)
+ * Copyright (c) 2010-2011 Shikai Chen
+ *
+ * Licensed under the LGPL 2.1 license:
+ *   http://www.opensource.org/licenses/lgpl-2.1.php
  */
 
 #ifndef PINS_H

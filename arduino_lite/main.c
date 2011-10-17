@@ -1,7 +1,8 @@
 /*
- * Digital read 8bit data from PORTD3..7 PORTD0..1 (Arduino digital ports 3..9)
- * and output it as binary string (10001101) to serial. Floating state is high. 
- * Connect pin to ground to set it low.
+ * Digital read 8bit data from Arduino digital ports 2..9 using fast macro 
+ * implentation of pin numbering from ArduinoLite project. Output value 
+ * as binary string (10001101) to serial. Floating state is high. Connect pin 
+ * to ground to set it low.
  * 
  * Led at Arduino digital 13 (PORTB5). Cause we all love blinken leds!
  *
