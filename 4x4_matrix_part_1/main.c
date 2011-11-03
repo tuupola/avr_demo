@@ -38,45 +38,42 @@ static void init(void) {
 
 }
 
-void draw(uint8_t buffer[4][4]) {
-    static uint8_t row = 0;
+void draw(uint8_t buffer[4][4], uint8_t delay) {
+    
+    for (uint8_t row=0; row<4; ++row) {
+        /* Connect or disconnect columns as needed. */
+        for (uint8_t column=0; column<4; ++column) {
+            digital_write(column_pins[column], buffer[row][column]);                    
+        }
+        
+        /* Turn on whole row. */
+        digital_write(row_pins[row], LOW);
 
-    /* Turn off whole row. */
-    digital_write(row_pins[row], HIGH);
-    
-    /* Advance one row and make sure it is 0..4 */    
-    row++;
-    row = row % 4;
-    
-    /* Connect or disconnect columns as needed. */
-    for (uint8_t column=0; column<4; column++) {
-        digital_write(column_pins[column], buffer[row][column]);                    
+        _delay_ms(delay);
+
+        /* Turn off whole row. */
+        digital_write(row_pins[row], HIGH);
     }
-    
-    /* Turn on whole row. */
-    digital_write(row_pins[row], LOW);
 }
 
-int main(void) {    
+uint8_t main(void) {    
     
     init();
     
     /* With 100ms delay eye can see updating row by row. */
-    for (uint8_t i=0; i<40; i++) { 
-        draw(pattern);
-        _delay_ms(100);
+    for (uint8_t i=0; i<10; i++) { 
+        draw(pattern, 100);
     }
 
     /* With 10ms delay pattern appears but flickers. */
-    for (uint16_t i=0; i<400; i++) { 
-        draw(pattern);
-        _delay_ms(10);
+    for (uint16_t i=0; i<100; i++) { 
+        draw(pattern, 10);
     }
     
     /* Withoud delay solid pattern appears. */
     while (1) {
-        draw(pattern);        
+        draw(pattern, 1);        
     }
+    
     return 0;
-  
 }
