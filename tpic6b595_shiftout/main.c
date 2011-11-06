@@ -36,7 +36,8 @@
 
 #include "main.h"
 #include "uart.h"
-#include "digital_slow.h"
+#include "pins.h"
+#include "digital.h"
 
 #define LATCH   8   /* RCK */
 #define CLOCK   12  /* SRCK */
@@ -52,11 +53,14 @@ static void init(void) {
 void shift_out(uint8_t data) {
     for(uint8_t i = 0; i < 8; i++) {
         /* Write bit to data port. */
-        uint8_t bit = data & _BV(7 - i);
-		digital_write(DATA, bit);
-		
+        if (0 == (data & _BV(7 - i))) {
+            digital_write(DATA, LOW);            
+        } else {
+            digital_write(DATA, HIGH);
+        }
+        
         /* Pulse clock input to write next bit. */
-	    digital_write(CLOCK, LOW);
+        digital_write(CLOCK, LOW);
         digital_write(CLOCK, HIGH);
     }
 }

@@ -21,6 +21,8 @@
 #ifndef PINS_H
 #define PINS_H
 
+#include <avr/sfr_defs.h>
+#include <avr/io.h>
 
 #define HIGH 0x1
 #define LOW  0x0

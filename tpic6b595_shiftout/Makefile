@@ -51,7 +51,7 @@ FORMAT = ihex
 TARGET = main
 
 # List C source files here. (C dependencies are automatically generated.) 
-SRC = $(TARGET).c uart_async.c digital_slow.c
+SRC = $(TARGET).c uart_async.c 
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
