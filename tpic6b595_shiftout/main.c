@@ -1,5 +1,5 @@
 /*
- * Code to write data to TPIC6B595 SIPO shift register.
+ * Code to write data to two daisychained TPIC6B595 SIPO shift registers.
  * 
  * The TPIC6B595 is a monolithic, high-voltage, medium-current power 8-bit 
  * shift register designed for use in systems that require relatively high 
@@ -39,9 +39,9 @@
 #include "pins.h"
 #include "digital.h"
 
-#define LATCH   8   /* RCK */
-#define CLOCK   12  /* SRCK */
+#define LATCH   10  /* RCK */
 #define DATA    11  /* SER IN */
+#define CLOCK   13  /* SRCK */
 
 static void init(void) {    
     pin_mode(LATCH, OUTPUT);
@@ -72,24 +72,32 @@ int main(void) {
     stdout = &uart_output;
     stdin  = &uart_input;
     
-    uint8_t binary[9];
+    char binary[17];
+    
+    /* Show pattern for 5 seconds. */
+    shift_out(0b10101010);
+    shift_out(0b11110000);
+    digital_write(LATCH, LOW); 
+    digital_write(LATCH, HIGH);
+    _delay_ms(5000);
     
     while (1) {
-        for(uint8_t i = 0; i < 256; i++) {
+        for(uint16_t i = 0; i < 0xffff; i++) {
             
             /* Print the number to serial for debugging. */
             itoa(i, binary, 2);
             printf("%s %d \n", binary, i);
 
-            /* Shift current number to shift register. */
-            shift_out(i);
+            /* Shift high byte first to shift register. */
+            shift_out(i >> 8); 
+            shift_out(i & 0xff);
 
             /* Pulse latch to transfer data from shift registers */
             /* to storage registers (should this be inside shift_out()?). */
             digital_write(LATCH, LOW); 
             digital_write(LATCH, HIGH);
 
-            _delay_ms(250);
+            _delay_ms(50);
         }
     }
     return 0;
