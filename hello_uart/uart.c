@@ -29,5 +29,3 @@ int uart_getchar(FILE *stream) {
     loop_until_bit_is_set(UCSR0A, RXC0);
     return UDR0;
 }
-
-

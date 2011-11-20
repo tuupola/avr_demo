@@ -1,0 +1,120 @@
+   1               		.file	"spi.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.global __do_copy_data
+   8               		.global __do_clear_bss
+   9               		.text
+  10               	.Ltext0:
+  11               	.global	spi_init
+  13               	spi_init:
+  14               	.LFB0:
+  15               		.file 1 "spi.c"
+   1:spi.c         **** /*
+   2:spi.c         ****  * spi.c
+   3:spi.c         ****  *
+   4:spi.c         ****  * Copyright 2011 Mika Tuupola
+   5:spi.c         ****  *
+   6:spi.c         ****  * Licensed under the MIT license:
+   7:spi.c         ****  *   http://www.opensource.org/licenses/mit-license.php
+   8:spi.c         ****  *
+   9:spi.c         ****  */
+  10:spi.c         **** 
+  11:spi.c         **** #include "digital.h"
+  12:spi.c         **** #include "spi.h"
+  13:spi.c         **** 
+  14:spi.c         **** void spi_init(void) {
+  16               		.loc 1 14 0
+  17               	/* prologue: function */
+  18               	/* frame size = 0 */
+  19               	/* stack size = 0 */
+  20               	.L__stack_usage = 0
+  15:spi.c         ****     pin_mode(SPI_SCK, OUTPUT);
+  21               		.loc 1 15 0
+  22 0000 259A      		sbi 36-0x20,5
+  16:spi.c         ****     pin_mode(SPI_MOSI, OUTPUT);
+  23               		.loc 1 16 0
+  24 0002 239A      		sbi 36-0x20,3
+  17:spi.c         ****     pin_mode(SPI_SS, OUTPUT); /* Must be output in Master mode. */
+  25               		.loc 1 17 0
+  26 0004 229A      		sbi 36-0x20,2
+  18:spi.c         ****     spi_set_msb();
+  27               		.loc 1 18 0
+  28 0006 8CB5      		in r24,76-0x20
+  29 0008 8F7D      		andi r24,lo8(-33)
+  30 000a 8CBD      		out 76-0x20,r24
+  19:spi.c         ****     spi_set_master();
+  31               		.loc 1 19 0
+  32 000c 8CB5      		in r24,76-0x20
+  33 000e 8061      		ori r24,lo8(16)
+  34 0010 8CBD      		out 76-0x20,r24
+  20:spi.c         ****     spi_enable();
+  35               		.loc 1 20 0
+  36 0012 8CB5      		in r24,76-0x20
+  37 0014 8064      		ori r24,lo8(64)
+  38 0016 8CBD      		out 76-0x20,r24
+  39               	/* epilogue start */
+  21:spi.c         **** }
+  40               		.loc 1 21 0
+  41 0018 0895      		ret
+  42               	.LFE0:
+  44               	.global	spi_transfer
+  46               	spi_transfer:
+  47               	.LFB1:
+  22:spi.c         **** 
+  23:spi.c         **** uint8_t spi_transfer(volatile uint8_t data) {
+  48               		.loc 1 23 0
+  49               	.LVL0:
+  50 001a CF93      		push r28
+  51               	.LCFI0:
+  52 001c DF93      		push r29
+  53               	.LCFI1:
+  54 001e 0F92      		push __tmp_reg__
+  55               	.LCFI2:
+  56 0020 CDB7      		in r28,__SP_L__
+  57 0022 DEB7      		in r29,__SP_H__
+  58               	.LCFI3:
+  59               	/* prologue: function */
+  60               	/* frame size = 1 */
+  61               	/* stack size = 3 */
+  62               	.L__stack_usage = 3
+  63 0024 8983      		std Y+1,r24
+  24:spi.c         ****     SPDR = data;
+  64               		.loc 1 24 0
+  65 0026 8981      		ldd r24,Y+1
+  66               	.LVL1:
+  67 0028 8EBD      		out 78-0x20,r24
+  68               	.L3:
+  25:spi.c         ****     loop_until_bit_is_set(SPSR, SPIF);
+  69               		.loc 1 25 0 discriminator 1
+  70 002a 0DB4      		in __tmp_reg__,77-0x20
+  71 002c 07FE      		sbrs __tmp_reg__,7
+  72 002e 00C0      		rjmp .L3
+  26:spi.c         ****     return SPDR;
+  73               		.loc 1 26 0
+  74 0030 8EB5      		in r24,78-0x20
+  75               	/* epilogue start */
+  27:spi.c         **** }...
+  76               		.loc 1 27 0
+  77 0032 0F90      		pop __tmp_reg__
+  78 0034 DF91      		pop r29
+  79 0036 CF91      		pop r28
+  80 0038 0895      		ret
+  81               	.LFE1:
+ 137               	.Letext0:
+ 138               		.file 2 "/usr/local/Cellar/avr-gcc/4.6.1/lib/gcc/avr/4.6.1/../../../../avr/include/stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 spi.c
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//cchlYZ7A.s:2      *ABS*:000000000000003f __SREG__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//cchlYZ7A.s:3      *ABS*:000000000000003e __SP_H__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//cchlYZ7A.s:4      *ABS*:000000000000003d __SP_L__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//cchlYZ7A.s:5      *ABS*:0000000000000000 __tmp_reg__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//cchlYZ7A.s:6      *ABS*:0000000000000001 __zero_reg__
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//cchlYZ7A.s:13     .text:0000000000000000 spi_init
+/var/folders/6p/hvps1d6n58jfd6qghfhb96600000gn/T//cchlYZ7A.s:46     .text:000000000000001a spi_transfer
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss
