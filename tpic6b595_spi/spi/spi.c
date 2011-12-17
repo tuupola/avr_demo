@@ -8,11 +8,11 @@
  *
  */
 
-#include "digital.h"
-#include "spi.h"
+#include "pins/digital.h"
+#include "spi/spi.h"
 
 void spi_init(void) {
-    pin_mode(SPI_SCK, OUTPUT);
+    pin_mode(SPI_SCLK, OUTPUT);
     pin_mode(SPI_MOSI, OUTPUT);
     pin_mode(SPI_SS, OUTPUT); /* Must be output in Master mode. */
     spi_set_msb();
