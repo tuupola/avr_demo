@@ -32,23 +32,18 @@
  *
  */
 
+#define UART_RX_BUFFER_SIZE 128
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <util/delay.h>
-//#include <avr/io.h>
 
 #include "main.h"
-#include "uart.h"
-#include "pins.h"
-#include "digital.h"
-#include "spi.h"
+#include "uart/uart.h"
+#include "pins/digital.h"
+#include "spi/spi.h"
 
 static void init(void) {    
-}
-
-/* Assumes MSB first. */
-void shift_out(uint8_t data) {
-    spi_transfer(data);
 }
 
 int main(void) {    
@@ -62,11 +57,11 @@ int main(void) {
     char binary[17];
     
     /* Show pattern for 5 seconds. */
-    shift_out(0b10101010);
-    shift_out(0b11110000);
+    spi_transfer(0b10101010);
+    spi_transfer(0b11110000);
     digital_write(SPI_SS, LOW); 
     digital_write(SPI_SS, HIGH);
-    _delay_ms(5000);
+    _delay_ms(5000);    
     
     while (1) {
         for(uint16_t i = 0; i < 0xffff; i++) {
@@ -76,8 +71,8 @@ int main(void) {
             printf("%s %d \n", binary, i);
 
             /* Shift high byte first to shift register. */
-            shift_out(i >> 8); 
-            shift_out(i & 0xff);
+            spi_transfer(i >> 8); 
+            spi_transfer(i & 0xff);
             
             /* Pulse latch to transfer data from shift registers */
             /* to storage registers. */
@@ -85,8 +80,6 @@ int main(void) {
             //digital_write(LATCH, HIGH);
             digital_write(SPI_SS, LOW); 
             digital_write(SPI_SS, HIGH);
-
-            _delay_ms(50);
         }
     }
     return 0;

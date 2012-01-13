@@ -26,7 +26,7 @@
 #include <avr/sfr_defs.h>
 
 #include "main.h"
-#include "uart.h"
+//#include "uart.h"
 
 void init(void) {
     
@@ -54,9 +54,9 @@ void digital_write(volatile int *data_port, int pin, int value) {
 int main(void) {    
     
     init();
-    uart_init();
-    stdout = &uart_output;
-    stdin  = &uart_input;
+    //uart_init();
+    //stdout = &uart_output;
+    //stdin  = &uart_input;
         
     while (1) {
         /* Blink led by toggling state of PORTB5 (Arduino digital 13). */

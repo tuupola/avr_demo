@@ -28,6 +28,6 @@
 #define digital_read(pin)       EXPAND_WRAPPER(_DIGITAL_READ, PIN_TO_PORT(pin), PIN_TO_MASK(pin))
 #define digital_read_raw(pin)   EXPAND_WRAPPER(_DIGITAL_READ_RAW, PIN_TO_PORT(pin), PIN_TO_MASK(pin))
 #define digital_write(pin, val) DIGITAL_WRITE_##val(pin)
-#define digital_toggle(pin)         EXPAND_WRAPPER(_DIGITAL_TOGGLE, PIN_TO_PORT(pin), PIN_TO_MASK(pin))
+#define digital_toggle(pin)     EXPAND_WRAPPER(_DIGITAL_TOGGLE, PIN_TO_PORT(pin), PIN_TO_MASK(pin))
 
 #endif /* DIGITAL_H */

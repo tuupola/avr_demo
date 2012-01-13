@@ -18,57 +18,73 @@
 #endif
 #include <util/setbaud.h>
 
+#if defined (UBRR0H)
+
+#warning UART0
+#define UBRRxH UBRR0H
+#define UBRRxL UBRR0L
+#define UCSRxA UCSR0A
+#define U2Xx   U2X0
+#define UCSRxC UCSR0C
+#define UCSZx1 UCSZ01
+#define UCSZx0 UCSZ00
+#define UCSRxB UCSR0B
+#define RXENx  RXEN0
+#define TXENx  TXEN0
+#define UDREx  UDRE0 
+#define RXCx   RXC0
+#define UDRx   UDR0
+#define UDRIEx UDRIE0
+
+#elif defined (UBRR1H)
+
+#warning UART1
+#define UBRRxH UBRR1H
+#define UBRRxL UBRR1L
+#define UCSRxA UCSR1A
+#define U2Xx   U2X1 
+#define UCSRxC UCSR1C
+#define UCSZx1 UCSZ11
+#define UCSZx0 UCSZ10
+#define UCSRxB UCSR1B
+#define RXENx  RXEN1
+#define TXENx  TXEN1
+#define UDREx  UDRE1 
+#define RXCx   RXC1
+#define UDRx   UDR1
+#define UDRIEx UDRIE1
+
+#else
+#error No UART?
+#endif
+
 /* http://www.cs.mun.ca/~rod/Winter2007/4723/notes/serial/serial.html */
 
-#if defined (__AVR_ATmega32U4__)
 void uart_init(void) {
-    UBRR1H = UBRRH_VALUE;
-    UBRR1L = UBRRL_VALUE;
+    UBRRxH = UBRRH_VALUE;
+    UBRRxL = UBRRL_VALUE;
     
 #if USE_2X
-    UCSR1A |= _BV(U2X1);
+    UCSRxA |= _BV(U2Xx);
 #else
-    UCSR1A &= ~(_BV(U2X1));
+    UCSRxA &= ~(_BV(U2Xx));
 #endif
 
-    UCSR1C = _BV(UCSZ11) | _BV(UCSZ10); /* 8-bit data */ 
-    UCSR1B = _BV(RXEN1) | _BV(TXEN1);   /* Enable RX and TX */    
+    UCSRxC = _BV(UCSZx1) | _BV(UCSZx0); /* 8-bit data */ 
+    UCSRxB = _BV(RXENx) | _BV(TXENx);   /* Enable RX and TX */    
 }
-#else
-void uart_init(void) {
-    UBRR0H = UBRRH_VALUE;
-    UBRR0L = UBRRL_VALUE;
-    
-#if USE_2X
-    UCSR0A |= _BV(U2X0);
-#else
-    UCSR0A &= ~(_BV(U2X0));
-#endif
 
-    UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); /* 8-bit data */ 
-    UCSR0B = _BV(RXEN0) | _BV(TXEN0);   /* Enable RX and TX */    
-}
-#endif
-
-void uart_putchar(char c, FILE *stream) {
+int uart_putchar(char c, FILE *stream) {
     if (c == '\n') {
         uart_putchar('\r', stream);
     }
-#if defined (__AVR_ATmega32U4__)
-    loop_until_bit_is_set(UCSR1A, UDRE1);
-    UDR1 = c;
-#else
-    loop_until_bit_is_set(UCSR0A, UDRE0);
-    UDR0 = c;
-#endif
+    loop_until_bit_is_set(UCSRxA, UDREx);
+    UDRx = c;
+    
+    return 0;
 }
 
-char uart_getchar(FILE *stream) {
-#if defined (__AVR_ATmega32U4__)
-    loop_until_bit_is_set(UCSR1A, RXC1);
-    return UDR1;
-#else
-    loop_until_bit_is_set(UCSR0A, RXC0);
-    return UDR0;
-#endif
+int uart_getchar(FILE *stream) {
+    loop_until_bit_is_set(UCSRxA, RXCx);
+    return UDRx;
 }

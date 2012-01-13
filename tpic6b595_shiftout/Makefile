@@ -35,8 +35,8 @@
 
 
 # MCU name
-MCU = atmega328p
-
+#MCU = atmega328p
+MCU = atmega32u4
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the 
 #     processor frequency. You can then use this symbol in your source code to 
@@ -51,7 +51,7 @@ FORMAT = ihex
 TARGET = main
 
 # List C source files here. (C dependencies are automatically generated.) 
-SRC = $(TARGET).c uart_async.c 
+SRC = $(TARGET).c uart/uart_async.c 
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -192,7 +192,8 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # Type: avrdude -c ?
 # to get a full listing.
 #
-AVRDUDE_PROGRAMMER = arduino
+#AVRDUDE_PROGRAMMER = arduino
+AVRDUDE_PROGRAMMER = avr109
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
 AVRDUDE_PORT = /dev/tty.usb*    # programmer connected to serial device

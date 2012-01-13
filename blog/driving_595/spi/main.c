@@ -73,7 +73,7 @@ int main(void) {
         digital_write(SS, LOW); 
         digital_write(SS, HIGH);
 
-        _delay_ms(500);
+        _delay_ms(50);
     }
     return 0;
   

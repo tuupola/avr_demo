@@ -35,13 +35,17 @@
 #include <util/delay.h>
 
 #include "main.h"
-#include "uart.h"
-#include "pins.h"
-#include "digital.h"
+#include "uart/uart.h" 
+#include "pins/digital.h"
 
-#define LATCH   10  /* RCK */
-#define DATA    11  /* SER IN */
-#define CLOCK   13  /* SRCK */
+//#define LATCH   10  /* RCK */
+//#define DATA    11  /* SER IN */
+//#define CLOCK   13  /* SRCK */
+
+#define LATCH   B0  /* RCK */
+#define DATA    B2  /* SER IN */
+#define CLOCK   B1  /* SRCK */
+
 
 static void init(void) {    
     pin_mode(LATCH, OUTPUT);
@@ -71,7 +75,6 @@ int main(void) {
     uart_init();
     stdout = &uart_output;
     stdin  = &uart_input;
-    
     char binary[17];
     
     /* Show pattern for 5 seconds. */
