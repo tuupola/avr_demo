@@ -23,7 +23,7 @@
  * 
  * To compile and upload run: make clean; make; make program;
  * 
- * Copyright 2011 Mika Tuupola
+ * Copyright 2011-2012 Mika Tuupola
  *
  * Licensed under the MIT license:
  *   http://www.opensource.org/licenses/mit-license.php
@@ -36,42 +36,11 @@
 
 #include "main.h"
 #include "uart/uart.h" 
-#include "pins/digital.h"
-
-//#define LATCH   10  /* RCK */
-//#define DATA    11  /* SER IN */
-//#define CLOCK   13  /* SRCK */
-
-#define LATCH   B0  /* RCK */
-#define DATA    B2  /* SER IN */
-#define CLOCK   B1  /* SRCK */
-
-
-static void init(void) {    
-    pin_mode(LATCH, OUTPUT);
-    pin_mode(CLOCK, OUTPUT);
-    pin_mode(DATA,  OUTPUT); 
-}
-
-/* Assumes MSB first. */
-void shift_out(uint8_t data) {
-    for(uint8_t i = 0; i < 8; i++) {
-        /* Write bit to data port. */
-        if (0 == (data & _BV(7 - i))) {
-            digital_write(DATA, LOW);            
-        } else {
-            digital_write(DATA, HIGH);
-        }
-        
-        /* Pulse clock input to write next bit. */
-        digital_write(CLOCK, LOW);
-        digital_write(CLOCK, HIGH);
-    }
-}
+#include "shift/shift.h"
 
 int main(void) {    
     
-    init();
+    shift_out_init();
     uart_init();
     stdout = &uart_output;
     stdin  = &uart_input;
@@ -80,8 +49,7 @@ int main(void) {
     /* Show pattern for 5 seconds. */
     shift_out(0b10101010);
     shift_out(0b11110000);
-    digital_write(LATCH, LOW); 
-    digital_write(LATCH, HIGH);
+    shift_out_latch();
     _delay_ms(5000);
     
     while (1) {
@@ -96,9 +64,7 @@ int main(void) {
             shift_out(i & 0xff);
 
             /* Pulse latch to transfer data from shift registers */
-            /* to storage registers (should this be inside shift_out()?). */
-            digital_write(LATCH, LOW); 
-            digital_write(LATCH, HIGH);
+            shift_out_latch();
 
             _delay_ms(50);
         }
