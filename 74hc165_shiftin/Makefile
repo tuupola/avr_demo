@@ -51,7 +51,7 @@ FORMAT = ihex
 TARGET = main
 
 # List C source files here. (C dependencies are automatically generated.) 
-SRC = $(TARGET).c uart_async.c
+SRC = $(TARGET).c shift/shift.c uart/uart_async.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -92,7 +92,7 @@ CSTANDARD = -std=gnu99
 
 
 # Place -D or -U options here
-CDEFS = -DF_CPU=$(F_CPU)UL  
+CDEFS = -DF_CPU=$(F_CPU)UL  -DDEBUG
 
 # uncomment and adapt these line if you want different UART library buffer size
 #CDEFS += -DUART_RX_BUFFER_SIZE=128

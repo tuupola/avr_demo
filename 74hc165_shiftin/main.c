@@ -36,41 +36,15 @@
 #include <avr/sfr_defs.h>
 
 #include "main.h"
-#include "uart.h"
-#include "pins.h"
-#include "digital.h"
+#include "uart/uart.h"
+#include "pins/digital.h"
 
-#define LATCH   8   /* sh/ld */
-#define CLOCK   12  /* clk */
-#define DATA    13  /* qh */
-
-static void init(void) {    
-    pin_mode(LATCH, OUTPUT);
-    pin_mode(CLOCK, OUTPUT);
-    pin_mode(DATA,  INPUT); 
+static void init(void) {     
 }
-
-int shiftin(void) {
-    uint8_t byte = 0;
-    uint8_t pin_value;
-    
-    for(int i=0; i<8; i++) {
-        pin_value = digital_read(DATA);  
-        byte |= (pin_value << ((8 - 1) - i));          
-        printf("%d = %d \n", ((8 - 1) - i), pin_value);
-                
-        /* Pulse clock input (CP) LOW-HIGH to read next bit. */
-        digital_write(CLOCK, LOW);
-        //_delay_ms(10);
-        digital_write(CLOCK, HIGH);
-    }
-    return byte;
-}
-
 
 int main(void) {    
     
-    init();
+    shift_in_init();
     uart_init();
     stdout = &uart_output;
     stdin  = &uart_input;
@@ -80,20 +54,22 @@ int main(void) {
     while (1) {
         
         /* Read in parallel input by setting SH/LD low. */
-        digital_write(LATCH, LOW); 
+        //digital_write(LATCH, LOW); 
         //_delay_ms(10);
         
         /* Freeze data by setting SH/LD high. When SH/LD is high data enters */
         /* to reqisters from SER input and shifts one place to the right     */
         /* (Q0 -> Q1 -> Q2, etc.) with each positive-going clock transition. */
-        digital_write(LATCH, HIGH);
+        //digital_write(LATCH, HIGH);        
+
+        shift_in_latch();
         
         /* Read in first 74HC165 data. */
-        register_value = shiftin();        
+        register_value = shift_in();        
         printf("%d \n", register_value);
         
         /* Read in second 74HC165 data. */
-        register_value = shiftin();
+        register_value = shift_in();
         printf("%d \n", register_value);
         
         _delay_ms(2000);
