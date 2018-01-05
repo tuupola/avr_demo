@@ -15,6 +15,8 @@
 #include "main.h"
 #include "digital_slow.h"
 
+#define __DELAY_BACKWARD_COMPATIBLE__
+
 uint8_t column_pins[4] = {2, 3, 4, 5};
 uint8_t row_pins[4]    = {11, 10, 9, 8};
 uint8_t pattern[4][4]  = {{1,0,0,1},
@@ -56,7 +58,7 @@ void draw(uint8_t buffer[4][4], uint8_t delay) {
     }
 }
 
-uint8_t main(void) {    
+int main(void) {    
     
     init();
     
